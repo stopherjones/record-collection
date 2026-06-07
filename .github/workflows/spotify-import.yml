@@ -1,32 +1,26 @@
-name: Spotify Import
-
 on:
+  workflow_dispatch:
   push:
     paths:
       - "pending.json"
 
 jobs:
-  build:
+  import:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install fetch polyfill
-        run: npm install node-fetch@3
-
-      - name: Run import script
-        run: node .github/scripts/spotify-import.js
-
-      - name: Commit changes
+      - uses: actions/setup-node@v4
+        with: node-version: 20
+      - run: npm install node-fetch@3
+      - name: Run importer
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+        run: node .github/scripts/spotify-api-import.js
+      - name: Commit
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add records.json pending.json
-          git commit -m "Imported Spotify metadata" || echo "No changes"
+          git commit -m "Import Spotify metadata" || echo "No changes"
           git push
