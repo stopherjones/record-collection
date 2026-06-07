@@ -1,0 +1,37 @@
+[
+  {
+    "title": "Kind Of Blue",
+    "artist": "Miles Davis",
+    "year": 1959,
+    "url": "https://open.spotify.com/album/1weenld61qoidwYuZ1GESA",
+    "tags": ["Main", "Moods"]
+  },
+  {
+    "title": "Shatner Claus",
+    "artist": "William Shatner",
+    "year": 2018,
+    "url": "https://open.spotify.com/album/3qIFrZLHvYdd2jZcJaeRwd",
+    "tags": ["Christmas albums"]
+  },
+  {
+    "title": "Rumours",
+    "artist": "Fleetwood Mac",
+    "year": 1977,
+    "url": "https://open.spotify.com/album/4FZtfIXXH7eU5xMXL2r0Vt",
+    "tags": ["Classic rock", "Main"]
+  },
+  {
+    "title": "Future Nostalgia",
+    "artist": "Dua Lipa",
+    "year": 2020,
+    "url": "https://open.spotify.com/album/4kjzA6rSx2imtd4W0z2xXm",
+    "tags": ["Pop", "Modern"]
+  },
+  {
+    "title": "Moondance",
+    "artist": "Van Morrison",
+    "year": 1970,
+    "url": "https://open.spotify.com/album/7oV0fVRBvWlM7P3gN0wGQ4",
+    "tags": ["Jazz", "Vintage"]
+  }
+]

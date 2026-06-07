@@ -1,0 +1,11 @@
+{
+  "name": "virtual-record-collection",
+  "version": "1.0.0",
+  "description": "A virtual record collection dashboard for GitHub Pages",
+  "scripts": {
+    "start": "echo \"Open index.html in a browser\""
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
