@@ -1,0 +1,35 @@
+name: Update Virtual Library Data
+
+on:
+  push:
+    paths:
+      - '*.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install Dependencies
+      run: pip install spotipy
+
+    - name: Run Update Script
+      env:
+        SPOTIPY_CLIENT_ID: ${{ secrets.SPOTIPY_CLIENT_ID }}
+        SPOTIPY_CLIENT_SECRET: ${{ secrets.SPOTIPY_CLIENT_SECRET }}
+      run: python update_library.py
+
+    # This handles both updating the code and triggering the classic deployment
+    - name: Commit and Push Changes
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: "Automated library.json update from Markdown edit"
+        branch: main # Pushing directly back to your main hosting branch
