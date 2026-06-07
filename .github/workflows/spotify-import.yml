@@ -1,0 +1,32 @@
+name: Spotify Import
+
+on:
+  push:
+    paths:
+      - "pending.json"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install fetch polyfill
+        run: npm install node-fetch@3
+
+      - name: Run import script
+        run: node .github/scripts/spotify-import.js
+
+      - name: Commit changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add records.json pending.json
+          git commit -m "Imported Spotify metadata" || echo "No changes"
+          git push
