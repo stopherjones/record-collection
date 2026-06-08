@@ -1,45 +1,38 @@
 # 💿 Virtual Record Collection
 
-A static music dashboard for GitHub Pages. Browse your favorite albums with era filters, tag-based filtering, and clean record cards.
+A simple 'virtual record collection' intended to make it easier to see what albums and playlists you've saved on Spotify.
 
----
+Features include 
 
-## What it does
-
-| Feature | Detail |
-|---|---|
-| **Era filters** | Classic / Vintage / Modern card categories |
-| **Tag filtering** | Filter albums by mood, genre, or playlist tags |
-| **Clean dashboard** | Static UI powered by `index.html` |
-| **GitHub Pages friendly** | Deploy the site directly from the repo |
-
----
+- sort by Artist, Title and Year 
+- filter by user-generated tags, such as Film scores, Christmas albums, Main collection
+- random entry picker, including within filtered results
+- search
 
 ## How to add records
 
-Edit `data/records.json` and add album objects using this format:
+The simplest way is to add the Spotify url and any tags to `pending.json`:
 
-```json
-[
   {
-    "title": "Kind Of Blue",
-    "artist": "Miles Davis",
-    "year": 1959,
-    "url": "https://open.spotify.com/album/1weenld61qoidwYuZ1GESA",
-    "tags": ["Main", "Moods"]
+    "url": "",
+    "tags": ["", ""]
   }
-]
-```
 
-- `title` — album name
-- `artist` — recording artist / band
-- `year` — release year
-- `url` — link to the album page
-- `tags` — list of genres, moods, playlists, or collection notes
+When you commit to Github the spotify-import.yml action will then pull the remaining details - artist, title, year and thumbnail - update `data/records.json` and clean `pending.json`
 
-## Run locally
+Alternatively, record the details manually in `data/records.json`:
 
-Open `index.html` in your browser. No build step required.
+  {
+    "title": "",
+    "artist": "",
+    "year": "",
+    "url": "",
+    "thumbnail": "",
+    "tags": [
+      "", ""
+    ]
+  }
+
 
 ## Deploy to GitHub Pages
 
@@ -49,46 +42,3 @@ Open `index.html` in your browser. No build step required.
 
 The site will render the `index.html` dashboard and read albums from `data/records.json`.
 
----
-
-## Notes
-
-- The dashboard uses year ranges to categorize albums:
-  - `Classic` — before 1980
-  - `Vintage` — 1980–1999
-  - `Modern` — 2000 and later
-- Filter on a tag to narrow the collection by genres like `Jazz`, `Pop`, or `Christmas albums`.
-
-New entries in pending.json on need the Spotify url and personal tags:
-
-  {
-    "url": "",
-    "tags": [""]
-  }
-
-Manual entried to records.json need the full data 
-
-  {
-    "title": "",
-    "artist": "",
-    "year": "",
-    "url": "",
-    "thumbnail_url": "",
-    "tags": [
-      ""
-    ]
-  }
-
-To get the thumbnail url: 
-
-Copy the genuine Spotify link for your album or playlist.
-
-Open a new tab in your browser and paste this prefix into the address bar:
-https://open.spotify.com/oembed?url=
-
-Paste your Spotify link directly after the equal sign so it looks like this:
-https://open.spotify.com/oembed?url=https://open.spotify.com/album/4aawyAB9vmqN3uCO70I6Ft
-
-Press Enter. You’ll see a line of text on your screen. Look for the "thumbnail_url" key.
-
-Copy the image link right next to it (it will start with https://i.scdn.co/image/...) and paste it right into your JSON.
