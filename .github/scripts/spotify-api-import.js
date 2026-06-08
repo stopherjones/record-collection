@@ -89,10 +89,11 @@ async function run() {
 
       else if (info.type === "playlist") {
         const pl = await fetchPlaylist(info.id, token);
+        const playlistArtist = (pl.name || "").match(/^This is\s+(.+)$/i)?.[1]?.trim() || "Various Artists";
 
         newRecords.push({
           title: pl.name,
-          artist: pl.owner?.display_name || pl.owner?.id || "",
+          artist: playlistArtist,
           year: null,
           url: item.url,
           thumbnail: pl.images?.[0]?.url || null,
