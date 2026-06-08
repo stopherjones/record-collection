@@ -13,19 +13,25 @@
     <span class="logo">💿</span>
     <div>
       <h1>Virtual Record Collection</h1>
-      <div class="subtitle">Browse albums by era, artist, and tags</div>
+      <div class="subtitle">Browse by artist, theme or year</div>
     </div>
   </div>
   <div class="header-actions">
-    <select id="tag-select" class="filter-select" aria-label="Filter records by tag">
-      <option value="all">All</option>
-    </select>
-    <select id="sort-select" class="filter-select" aria-label="Sort records">
-      <option value="title">Sort by Title</option>
-      <option value="artist">Sort by Artist</option>
-      <option value="year">Sort by Year</option>
-    </select>
-    <button id="random-btn" class="filter-btn">🎲 Random entry</button>
+    <div class="controls-top">
+      <select id="tag-select" class="filter-select" aria-label="Filter records by tag">
+        <option value="all">All</option>
+      </select>
+      <select id="sort-select" class="filter-select" aria-label="Sort records">
+        <option value="title">Sort by Title</option>
+        <option value="artist">Sort by Artist</option>
+        <option value="year">Sort by Year</option>
+      </select>
+    </div>
+
+    <div class="controls-bottom">
+      <input id="search-input" class="search-input" type="search" placeholder="Search by title, artist, tag or year" aria-label="Search records">
+      <button id="random-btn" class="filter-btn">🎲 Random entry</button>
+    </div>
   </div>
 </header>
 
@@ -50,6 +56,7 @@
       allRecords = Array.isArray(data) ? data : [];
       initTagSelect();
       initSortSelect();
+      initSearchInput();
       initRandomButton();
       render();
     })
@@ -91,7 +98,15 @@
 
   function getFilteredRecords() {
     return allRecords.filter(record => {
-      return currentFilter === 'all' || (record.tags || []).includes(currentFilter);
+      const matchesTag = currentFilter === 'all' || (record.tags || []).includes(currentFilter);
+      if (!matchesTag) return false;
+      if (!currentSearch) return true;
+
+      const hay = [record.title, record.artist, ...(record.tags || []), record.year]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return hay.indexOf(currentSearch) !== -1;
     });
   }
 
@@ -172,6 +187,17 @@
       if (!sorted.length) return;
       const randomIndex = Math.floor(Math.random() * sorted.length);
       render(randomIndex);
+    });
+  }
+
+  // ── Search ─────────────────────────────────────────────────────────────────
+  let currentSearch = '';
+  function initSearchInput() {
+    const input = document.getElementById('search-input');
+    if (!input) return;
+    input.addEventListener('input', () => {
+      currentSearch = (input.value || '').trim().toLowerCase();
+      render();
     });
   }
 
