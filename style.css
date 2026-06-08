@@ -36,14 +36,18 @@ header h1 { font-size: 1.5rem; font-weight: 700; }
 header .logo { font-size: 2rem; }
 header .subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 2px; }
 
-main { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+main { max-width: 1440px; margin: 0 auto; padding: 32px 24px; }
 
 /* ── Filters ── */
 .filters {
   display: flex;
-  gap: 10px;
-  margin-bottom: 28px;
+  gap: 12px;
+  margin: 0 auto 28px;
   flex-wrap: wrap;
+  width: min(100%, 1280px);
+}
+.filters > * {
+  flex: 1 1 240px;
 }
 .filter-btn {
   padding: 6px 16px;
@@ -76,7 +80,10 @@ main { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
 .cards { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 
 @media (min-width: 1200px) {
-  .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  main { padding-left: 48px; padding-right: 48px; }
+  .cards { grid-template-columns: repeat(4, minmax(260px, 1fr)); }
+  .filters { gap: 18px; }
+  .filter-select { min-width: 280px; }
 }
 
 .card {
