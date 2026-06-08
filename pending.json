@@ -40,8 +40,10 @@
       "Moods"
     ]
   },
-    {
+  {
     "url": "https://open.spotify.com/track/3WuuyogOUZiNxmuhlARPVE?si=303a784ab4da4214",
-    "tags": ["Live"]
+    "tags": [
+      "Live"
+    ]
   }
 ]
