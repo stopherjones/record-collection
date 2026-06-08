@@ -60,4 +60,7 @@ The site will render the `index.html` dashboard and read albums from `data/recor
 - Filter on a tag to narrow the collection by genres like `Jazz`, `Pop`, or `Christmas albums`.
 
 
-
+  {
+    "url": "https://open.spotify.com/album/3SUEJULSGgBDG1j4GQhfYY?si=BRWWpmy0Qkm0uEjJhngyjA",
+    "tags": ["Main"]
+  }
