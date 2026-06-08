@@ -61,6 +61,6 @@ The site will render the `index.html` dashboard and read albums from `data/recor
 
 
   {
-    "url": "https://open.spotify.com/album/3SUEJULSGgBDG1j4GQhfYY?si=BRWWpmy0Qkm0uEjJhngyjA",
-    "tags": ["Main"]
+    "url": "",
+    "tags": [""]
   }
