@@ -59,8 +59,36 @@ The site will render the `index.html` dashboard and read albums from `data/recor
   - `Modern` — 2000 and later
 - Filter on a tag to narrow the collection by genres like `Jazz`, `Pop`, or `Christmas albums`.
 
+New entries in pending.json on need the Spotify url and personal tags:
 
   {
     "url": "",
     "tags": [""]
   }
+
+Manual entried to records.json need the full data 
+
+  {
+    "title": "",
+    "artist": "",
+    "year": "",
+    "url": "",
+    "thumbnail_url": "",
+    "tags": [
+      ""
+    ]
+  }
+
+To get the thumbnail url: 
+
+Copy the genuine Spotify link for your album or playlist.
+
+Open a new tab in your browser and paste this prefix into the address bar:
+https://open.spotify.com/oembed?url=
+
+Paste your Spotify link directly after the equal sign so it looks like this:
+https://open.spotify.com/oembed?url=https://open.spotify.com/album/4aawyAB9vmqN3uCO70I6Ft
+
+Press Enter. You’ll see a line of text on your screen. Look for the "thumbnail_url" key.
+
+Copy the image link right next to it (it will start with https://i.scdn.co/image/...) and paste it right into your JSON.
