@@ -9,26 +9,27 @@
 <body>
 
 <header>
-  <span class="logo">💿</span>
-  <div>
-    <h1>Virtual Record Collection</h1>
-    <div class="subtitle">Browse albums by era, artist, and tags</div>
+  <div class="brand">
+    <span class="logo">💿</span>
+    <div>
+      <h1>Virtual Record Collection</h1>
+      <div class="subtitle">Browse albums by era, artist, and tags</div>
+    </div>
   </div>
-</header>
-
-<main>
-  <div class="filters">
+  <div class="header-actions">
     <select id="tag-select" class="filter-select" aria-label="Filter records by tag">
       <option value="all">All</option>
     </select>
-    <button id="random-btn" class="filter-btn">🎲 Random entry</button>
     <select id="sort-select" class="filter-select" aria-label="Sort records">
       <option value="title">Sort by Title</option>
       <option value="artist">Sort by Artist</option>
       <option value="year">Sort by Year</option>
     </select>
+    <button id="random-btn" class="filter-btn">🎲 Random entry</button>
   </div>
+</header>
 
+<main>
   <div class="cards" id="cards">
     <div class="loading">
       <div class="spinner"></div>

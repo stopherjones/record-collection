@@ -29,8 +29,12 @@ header {
   border-bottom: 1px solid var(--border);
   padding: 20px 32px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
 }
 header h1 { font-size: 1.5rem; font-weight: 700; }
 header .logo { font-size: 2rem; }
@@ -38,17 +42,39 @@ header .subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 2px; }
 
 main { max-width: 1440px; margin: 0 auto; padding: 32px 24px; }
 
-/* ── Filters ── */
-.filters {
+/* ── Header actions ── */
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.header-actions {
   display: flex;
   gap: 12px;
-  margin: 0 auto 28px;
   flex-wrap: wrap;
-  width: min(100%, 1280px);
+  justify-content: flex-end;
+  width: min(100%, 840px);
 }
-.filters > * {
-  flex: 1 1 240px;
+
+.header-actions > * {
+  flex: 1 1 220px;
+  min-width: 180px;
 }
+
 .filter-btn {
   padding: 6px 16px;
   border-radius: 99px;
