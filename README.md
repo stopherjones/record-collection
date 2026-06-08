@@ -18,9 +18,9 @@ The simplest way is to add the Spotify url and any tags to `pending.json`:
     "tags": ["", ""]
   }
 
-When you commit to Github the spotify-import.yml action will then pull the remaining details - artist, title, year and thumbnail - update `data/records.json` and clean `pending.json`
+When you commit to Github the spotify-import.yml action will then pull the remaining details - artist, title, year and thumbnail - update `records.json` and clean `pending.json`
 
-Alternatively, record the details manually in `data/records.json`:
+Alternatively, record the details manually in `records.json`:
 
   {
     "title": "",
@@ -55,4 +55,4 @@ Copy the image link right next to it (it will start with https://i.scdn.co/image
 2. Go to **Settings → Pages**.
 3. Set the source to **GitHub Actions** or **Deploy from main branch**.
 
-The site will render the `index.html` dashboard and read albums from `data/records.json`.
+The site will render the `index.html` dashboard and read albums from `records.json`.
