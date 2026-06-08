@@ -1,3 +1,33 @@
 [
-
+  {
+    "title": "Kind Of Blue",
+    "artist": "Miles Davis",
+    "year": "1959",
+    "url": "https://open.spotify.com/album/1weenld61qoidwYuZ1GESA",
+    "thumbnail": "https://i.scdn.co/image/ab67616d0000b273387a29c90de3b2398c29c34f",
+    "tags": [
+      "Main",
+      "Moods"
+    ]
+  },
+  {
+    "title": "Shatner Claus",
+    "artist": "William Shatner",
+    "year": "2018",
+    "url": "https://open.spotify.com/album/3qIFrZLHvYdd2jZcJaeRwd",
+    "thumbnail": "https://i.scdn.co/image/ab67616d0000b2730daef9547f7c758110136619",
+    "tags": [
+      "Christmas albums"
+    ]
+  },
+  {
+    "title": "LUX",
+    "artist": "ROSALÍA",
+    "year": "2025",
+    "url": "https://open.spotify.com/album/3SUEJULSGgBDG1j4GQhfYY?si=BRWWpmy0Qkm0uEjJhngyjA",
+    "thumbnail": "https://i.scdn.co/image/ab67616d0000b27393ee2e2f2dfb7de9befcc164",
+    "tags": [
+      "Main"
+    ]
+  }
 ]
