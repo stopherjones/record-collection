@@ -10,7 +10,6 @@
 
 <header>
   <div class="brand">
-    <span class="logo">💿</span>
     <div>
       <h1>Virtual Record Collection</h1>
       <div class="subtitle">Browse by artist, theme or year</div>
@@ -26,6 +25,10 @@
         <option value="artist">Sort by Artist</option>
         <option value="year">Sort by Year</option>
       </select>
+      <label class="toggle-label">
+        <input id="hide-christmas" type="checkbox">
+        Hide Christmas
+      </label>
     </div>
 
     <div class="controls-bottom">
@@ -48,6 +51,7 @@
   let allRecords = [];
   let currentFilter = 'all';
   let currentSort = 'title';
+  let currentHideChristmas = false;
 
   // ── Fetch data ──────────────────────────────────────────────────────────────
   fetch('records.json?_=' + Date.now())
@@ -56,6 +60,7 @@
       allRecords = Array.isArray(data) ? data : [];
       initTagSelect();
       initSortSelect();
+      initHideChristmas();
       initSearchInput();
       initRandomButton();
       render();
@@ -100,6 +105,7 @@
     return allRecords.filter(record => {
       const matchesTag = currentFilter === 'all' || (record.tags || []).includes(currentFilter);
       if (!matchesTag) return false;
+      if (currentHideChristmas && isChristmasRecord(record)) return false;
       if (!currentSearch) return true;
 
       const hay = [record.title, record.artist, ...(record.tags || []), record.year]
@@ -192,6 +198,15 @@
 
   // ── Search ─────────────────────────────────────────────────────────────────
   let currentSearch = '';
+  function initHideChristmas() {
+    const checkbox = document.getElementById('hide-christmas');
+    if (!checkbox) return;
+    checkbox.addEventListener('change', () => {
+      currentHideChristmas = checkbox.checked;
+      render();
+    });
+  }
+
   function initSearchInput() {
     const input = document.getElementById('search-input');
     if (!input) return;
@@ -199,6 +214,14 @@
       currentSearch = (input.value || '').trim().toLowerCase();
       render();
     });
+  }
+
+  function isChristmasRecord(record) {
+    const text = [record.title, record.artist, ...(record.tags || []), record.year]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    return text.includes('christmas');
   }
 
   // ── Utils ───────────────────────────────────────────────────────────────────

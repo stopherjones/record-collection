@@ -124,6 +124,20 @@ main { max-width: 1440px; margin: 0 auto; padding: 32px 24px; }
 .filter-select:hover { border-color: var(--accent); }
 .filter-select:focus { outline: none; border-color: var(--accent); }
 
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 0.85rem;
+  min-width: 160px;
+}
+.toggle-label input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
 /* ── Cards ── */
 .cards { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 
@@ -243,7 +257,37 @@ tbody td { padding: 7px 12px; border-bottom: 1px solid var(--border); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 600px) {
-  header { padding: 16px; }
+  header {
+    padding: 16px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .brand {
+    width: 100%;
+  }
+  .header-actions {
+    width: 100%;
+    align-items: stretch;
+  }
+  .controls-top,
+  .controls-bottom {
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .controls-top > * {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 140px;
+  }
+  .controls-bottom > * {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .search-input {
+    flex: 1 1 100%;
+  }
+  .filter-btn {
+    flex: 0 1 auto;
+  }
   main { padding: 20px 16px; }
   .card { padding: 16px; }
   .card-thumb { width: 56px; height: 56px; }
