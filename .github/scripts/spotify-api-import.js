@@ -44,15 +44,12 @@ async function fetchJSON(url, token) {
 
 // ---------- Album + Playlist Fetchers ----------
 async function fetchAlbum(id, token) {
-  // Added the missing $ sign for variable interpolation
-  return fetchJSON(`https://api.spotify.com/v1/albums/$/${id}`, token); 
+  return fetchJSON(`https://api.spotify.com/v1/albums/${id}`, token);
 }
 
 async function fetchPlaylist(id, token) {
-  // Added the missing $ sign for variable interpolation
-  return fetchJSON(`https://api.spotify.com/v1/playlists/$/${id}`, token);
+  return fetchJSON(`https://api.spotify.com/v1/playlists/${id}`, token);
 }
-
 // ---------- Main ----------
 async function run() {
   const pending = JSON.parse(fs.readFileSync("pending.json", "utf8"));
