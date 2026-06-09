@@ -3093,10 +3093,11 @@
     "url": "https://open.spotify.com/album/0DDsDqhH1cWmQ59cIWrxw3?si=Be06eeGGSeKbsbn2wHzGMw",
     "thumbnail": "https://i.scdn.co/image/ab67616d0000b273c0dbc35aa639ff06e9e62219",
     "tags": [
-      "Concept albums", "Moods"
+      "Concept albums",
+      "Moods"
     ]
   },
-    {
+  {
     "title": "Atmospheric Sci-fi Soundtracks",
     "artist": "Various Artists",
     "year": null,
@@ -3106,7 +3107,7 @@
       "Moods"
     ]
   },
-    {
+  {
     "title": "Hindustani Classical",
     "artist": "Various Artists",
     "year": null,
@@ -3116,7 +3117,7 @@
       "Moods"
     ]
   },
-    {
+  {
     "title": "This Is Hildur Guðnadóttir",
     "artist": "Hildur Guðnadóttir",
     "year": null,
@@ -3126,12 +3127,32 @@
       "Moods"
     ]
   },
-    {
+  {
     "title": "Folk Punjabi",
     "artist": "Various Artists",
     "year": null,
     "url": "https://open.spotify.com/playlist/37i9dQZF1DX5lHBoCtADgQ?si=QLdbs8DxQtykxRAcLHtF1Q",
     "thumbnail": "https://i.scdn.co/image/ab67706f00000002f54447b6d8b5cf64e2526802",
+    "tags": [
+      "Moods"
+    ]
+  },
+  {
+    "title": "Afghan Rubab with Songbirds",
+    "artist": "Ustad Rahim Khushnawaz",
+    "year": "2016",
+    "url": "https://open.spotify.com/album/2jQPGXYEbAB23SR98hI93j?si=YW_4-xj1Rl2IH_O8exmJ9A",
+    "thumbnail": "https://i.scdn.co/image/ab67616d0000b273ddcc3e1e0f00e3d2a44bc1bf",
+    "tags": [
+      "Moods"
+    ]
+  },
+  {
+    "title": "ELECTROTANGO",
+    "artist": "Various Artists",
+    "year": null,
+    "url": "https://open.spotify.com/playlist/3DREk2gyl3Wjf96TKJIUp6?si=mhvoJ-A5RM-1xq_Yq_8eig",
+    "thumbnail": "https://mosaic.scdn.co/640/ab67616d00001e0207b5b545ff993079008f2ac7ab67616d00001e0220a55b8cbdffe5102c854bacab67616d00001e025c83010943fdfd7eb45b9f6eab67616d00001e027a774bd5cc35e51700095abc",
     "tags": [
       "Moods"
     ]
