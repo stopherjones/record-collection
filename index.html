@@ -1,125 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My virtual Record Collection</title>
+  <meta name="google-site-verification" content="b6V_v5n97L1u_l5J3L9c-U9n9n0C9j9n0C9n0C9n0" />
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<header>
-  <div class="brand">
-    <div>
-      <h1>Virtual Record Collection</h1>
-      <div class="subtitle">Browse by artist, theme or year</div>
+  <header>
+    <div class="brand">
+      <div>
+        <h1>Virtual Record Collection</h1>
+        <div class="subtitle">Browse by artist, theme or year</div>
+      </div>
     </div>
-  </div>
-  <div class="header-actions">
-    <div class="controls-top">
-      <select id="tag-select" class="filter-select" aria-label="Filter records by tag">
-        <option value="all">All</option>
-      </select>
-      <select id="sort-select" class="filter-select" aria-label="Sort records">
-        <option value="title">Sort by Title</option>
-        <option value="artist">Sort by Artist</option>
-        <option value="year">Sort by Year</option>
-      </select>
-      <label class="toggle-label">
-        <input id="hide-christmas" type="checkbox">
-        Hide Christmas
-      </label>
+    <div class="header-actions">
+      <div class="controls-top">
+        <select id="tag-select" class="filter-select" aria-label="Filter records by tag">
+          <option value="all">All</option>
+        </select>
+        <select id="sort-select" class="filter-select" aria-label="Sort records">
+          <option value="title">Sort by Title</option>
+          <option value="artist">Sort by Artist</option>
+          <option value="year">Sort by Year</option>
+        </select>
+        <label class="toggle-label">
+          <input id="hide-christmas" type="checkbox">
+          Hide Christmas
+        </label>
+      </div>
+
+      <div class="controls-bottom">
+        <input id="search-input" class="search-input" type="search" placeholder="Search by title, artist, tag or year"
+          aria-label="Search records">
+        <button id="random-btn" class="filter-btn">🎲 Random entry</button>
+      </div>
     </div>
+  </header>
 
-    <div class="controls-bottom">
-      <input id="search-input" class="search-input" type="search" placeholder="Search by title, artist, tag or year" aria-label="Search records">
-      <button id="random-btn" class="filter-btn">🎲 Random entry</button>
+  <main>
+    <div class="cards" id="cards">
+      <div class="loading">
+        <div class="spinner"></div>
+        Loading record data…
+      </div>
     </div>
-  </div>
-</header>
+  </main>
 
-<main>
-  <div class="cards" id="cards">
-    <div class="loading">
-      <div class="spinner"></div>
-      Loading record data…
-    </div>
-  </div>
-</main>
+  <script>
+    let allRecords = [];
+    let currentFilter = 'all';
+    let currentSort = 'title';
+    let currentHideChristmas = false;
 
-<script>
-  let allRecords = [];
-  let currentFilter = 'all';
-  let currentSort = 'title';
-  let currentHideChristmas = false;
+    // ── Fetch data ──────────────────────────────────────────────────────────────
+    fetch('records.json?_=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        allRecords = Array.isArray(data) ? data : [];
+        initTagSelect();
+        initSortSelect();
+        initHideChristmas();
+        initSearchInput();
+        initRandomButton();
+        render();
+      })
+      .catch(err => {
+        document.getElementById('cards').innerHTML =
+          `<div class="empty">⚠️ Could not load record data.<br><small>${escHtml(err.message)}</small></div>`;
+      });
 
-  // ── Fetch data ──────────────────────────────────────────────────────────────
-  fetch('records.json?_=' + Date.now())
-    .then(r => r.json())
-    .then(data => {
-      allRecords = Array.isArray(data) ? data : [];
-      initTagSelect();
-      initSortSelect();
-      initHideChristmas();
-      initSearchInput();
-      initRandomButton();
-      render();
-    })
-    .catch(err => {
-      document.getElementById('cards').innerHTML =
-        `<div class="empty">⚠️ Could not load record data.<br><small>${escHtml(err.message)}</small></div>`;
-    });
+    // ── Render ──────────────────────────────────────────────────────────────────
+    function render(highlightIndex) {
+      const filtered = getFilteredRecords();
 
-  // ── Render ──────────────────────────────────────────────────────────────────
-  function render(highlightIndex) {
-    const filtered = getFilteredRecords();
+      const sorted = [...filtered].sort((a, b) => {
+        if (currentSort === 'year') {
+          return (Number(a.year) || 0) - (Number(b.year) || 0);
+        }
+        const left = String(a[currentSort] || '').toLowerCase();
+        const right = String(b[currentSort] || '').toLowerCase();
+        return left.localeCompare(right);
+      });
 
-    const sorted = [...filtered].sort((a, b) => {
-      if (currentSort === 'year') {
-        return (Number(a.year) || 0) - (Number(b.year) || 0);
+      const container = document.getElementById('cards');
+      const randomBtn = document.getElementById('random-btn');
+
+      if (randomBtn) {
+        randomBtn.disabled = sorted.length === 0;
       }
-      const left = String(a[currentSort] || '').toLowerCase();
-      const right = String(b[currentSort] || '').toLowerCase();
-      return left.localeCompare(right);
-    });
 
-    const container = document.getElementById('cards');
-    const randomBtn = document.getElementById('random-btn');
+      if (sorted.length === 0) {
+        container.innerHTML = '<div class="empty">No records match this filter.</div>';
+        return;
+      }
 
-    if (randomBtn) {
-      randomBtn.disabled = sorted.length === 0;
+      container.innerHTML = sorted.map((record, index) => cardHTML(record, index)).join('');
+      if (typeof highlightIndex === 'number') {
+        highlightCardByIndex(highlightIndex);
+      }
     }
 
-    if (sorted.length === 0) {
-      container.innerHTML = '<div class="empty">No records match this filter.</div>';
-      return;
+    function getFilteredRecords() {
+      return allRecords.filter(record => {
+        const matchesTag = currentFilter === 'all' || (record.tags || []).includes(currentFilter);
+        if (!matchesTag) return false;
+        if (currentHideChristmas && isChristmasRecord(record)) return false;
+        if (!currentSearch) return true;
+
+        const hay = [record.title, record.artist, ...(record.tags || []), record.year]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return hay.indexOf(currentSearch) !== -1;
+      });
     }
 
-    container.innerHTML = sorted.map((record, index) => cardHTML(record, index)).join('');
-    if (typeof highlightIndex === 'number') {
-      highlightCardByIndex(highlightIndex);
-    }
-  }
+    function cardHTML(record, index) {
+      const tags = Array.isArray(record.tags) ? record.tags : [];
 
-  function getFilteredRecords() {
-    return allRecords.filter(record => {
-      const matchesTag = currentFilter === 'all' || (record.tags || []).includes(currentFilter);
-      if (!matchesTag) return false;
-      if (currentHideChristmas && isChristmasRecord(record)) return false;
-      if (!currentSearch) return true;
-
-      const hay = [record.title, record.artist, ...(record.tags || []), record.year]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return hay.indexOf(currentSearch) !== -1;
-    });
-  }
-
-  function cardHTML(record, index) {
-    const tags = Array.isArray(record.tags) ? record.tags : [];
-
-    return `
+      return `
       <div class="card" data-card-index="${index}">
         <div class="card-header">
           ${record.thumbnail ? `<img class="card-thumb" src="${escAttr(record.thumbnail)}" alt="${escAttr(record.title || '')}">` : ''}
@@ -138,115 +142,116 @@
           ↗ Open on Spotify
         </a>
       </div>`;
-  }
-
-  // ── Filter buttons ──────────────────────────────────────────────────────────
-  function initTagSelect() {
-    const select = document.getElementById('tag-select');
-    if (!select) return;
-
-    const tags = Array.from(new Set(
-      allRecords
-        .flatMap(record => Array.isArray(record.tags) ? record.tags : [])
-        .map(tag => (tag || '').trim())
-        .filter(Boolean)
-    )).sort((a, b) => a.localeCompare(b));
-
-    select.innerHTML = [
-      `<option value="all">All</option>`,
-      ...tags.map(tag => `<option value="${escAttr(tag)}">${escHtml(tag)}</option>`)
-    ].join('');
-
-    select.value = currentFilter;
-    select.addEventListener('change', () => {
-      currentFilter = select.value;
-      render();
-    });
-  }
-
-  function initSortSelect() {
-    const select = document.getElementById('sort-select');
-    if (!select) return;
-
-    select.value = currentSort;
-    select.addEventListener('change', () => {
-      currentSort = select.value;
-      render();
-    });
-  }
-
-  function initRandomButton() {
-    const button = document.getElementById('random-btn');
-    if (!button) return;
-
-    button.addEventListener('click', () => {
-      const filtered = getFilteredRecords();
-      const sorted = [...filtered].sort((a, b) => {
-        if (currentSort === 'year') {
-          return (Number(a.year) || 0) - (Number(b.year) || 0);
-        }
-        const left = String(a[currentSort] || '').toLowerCase();
-        const right = String(b[currentSort] || '').toLowerCase();
-        return left.localeCompare(right);
-      });
-
-      if (!sorted.length) return;
-      const randomIndex = Math.floor(Math.random() * sorted.length);
-      render(randomIndex);
-    });
-  }
-
-  // ── Search ─────────────────────────────────────────────────────────────────
-  let currentSearch = '';
-  function initHideChristmas() {
-    const checkbox = document.getElementById('hide-christmas');
-    if (!checkbox) return;
-    checkbox.addEventListener('change', () => {
-      currentHideChristmas = checkbox.checked;
-      render();
-    });
-  }
-
-  function initSearchInput() {
-    const input = document.getElementById('search-input');
-    if (!input) return;
-    input.addEventListener('input', () => {
-      currentSearch = (input.value || '').trim().toLowerCase();
-      render();
-    });
-  }
-
-  function isChristmasRecord(record) {
-    const text = [record.title, record.artist, ...(record.tags || []), record.year]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
-    return text.includes('christmas');
-  }
-
-  // ── Utils ───────────────────────────────────────────────────────────────────
-  function highlightCardByIndex(index) {
-    document.querySelectorAll('.card.highlighted').forEach(card => card.classList.remove('highlighted'));
-    const card = document.querySelector(`.card[data-card-index="${index}"]`);
-    if (card) {
-      card.classList.add('highlighted');
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }
 
-  function escHtml(str) {
-    if (!str) return '';
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
+    // ── Filter buttons ──────────────────────────────────────────────────────────
+    function initTagSelect() {
+      const select = document.getElementById('tag-select');
+      if (!select) return;
 
-  function escAttr(str) {
-    // For attribute values (we still escape HTML entities for safety)
-    return escHtml(str).replace(/'/g, '&#39;');
-  }
-</script>
+      const tags = Array.from(new Set(
+        allRecords
+          .flatMap(record => Array.isArray(record.tags) ? record.tags : [])
+          .map(tag => (tag || '').trim())
+          .filter(Boolean)
+      )).sort((a, b) => a.localeCompare(b));
+
+      select.innerHTML = [
+        `<option value="all">All</option>`,
+        ...tags.map(tag => `<option value="${escAttr(tag)}">${escHtml(tag)}</option>`)
+      ].join('');
+
+      select.value = currentFilter;
+      select.addEventListener('change', () => {
+        currentFilter = select.value;
+        render();
+      });
+    }
+
+    function initSortSelect() {
+      const select = document.getElementById('sort-select');
+      if (!select) return;
+
+      select.value = currentSort;
+      select.addEventListener('change', () => {
+        currentSort = select.value;
+        render();
+      });
+    }
+
+    function initRandomButton() {
+      const button = document.getElementById('random-btn');
+      if (!button) return;
+
+      button.addEventListener('click', () => {
+        const filtered = getFilteredRecords();
+        const sorted = [...filtered].sort((a, b) => {
+          if (currentSort === 'year') {
+            return (Number(a.year) || 0) - (Number(b.year) || 0);
+          }
+          const left = String(a[currentSort] || '').toLowerCase();
+          const right = String(b[currentSort] || '').toLowerCase();
+          return left.localeCompare(right);
+        });
+
+        if (!sorted.length) return;
+        const randomIndex = Math.floor(Math.random() * sorted.length);
+        render(randomIndex);
+      });
+    }
+
+    // ── Search ─────────────────────────────────────────────────────────────────
+    let currentSearch = '';
+    function initHideChristmas() {
+      const checkbox = document.getElementById('hide-christmas');
+      if (!checkbox) return;
+      checkbox.addEventListener('change', () => {
+        currentHideChristmas = checkbox.checked;
+        render();
+      });
+    }
+
+    function initSearchInput() {
+      const input = document.getElementById('search-input');
+      if (!input) return;
+      input.addEventListener('input', () => {
+        currentSearch = (input.value || '').trim().toLowerCase();
+        render();
+      });
+    }
+
+    function isChristmasRecord(record) {
+      const text = [record.title, record.artist, ...(record.tags || []), record.year]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return text.includes('christmas');
+    }
+
+    // ── Utils ───────────────────────────────────────────────────────────────────
+    function highlightCardByIndex(index) {
+      document.querySelectorAll('.card.highlighted').forEach(card => card.classList.remove('highlighted'));
+      const card = document.querySelector(`.card[data-card-index="${index}"]`);
+      if (card) {
+        card.classList.add('highlighted');
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function escHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escAttr(str) {
+      // For attribute values (we still escape HTML entities for safety)
+      return escHtml(str).replace(/'/g, '&#39;');
+    }
+  </script>
 </body>
+
 </html>
