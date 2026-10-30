@@ -12,37 +12,46 @@
 <body>
 
   <header>
-    <div class="brand">
+    <div class="title-row">
       <div>
         <h1>Virtual Record Collection</h1>
         <div class="subtitle">Browse by artist, theme or year</div>
       </div>
+      <button id="random-btn" class="icon-btn" aria-label="Random entry" title="Random entry">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <circle cx="8" cy="8" r="1.2" fill="currentColor"/>
+          <circle cx="16" cy="8" r="1.2" fill="currentColor"/>
+          <circle cx="12" cy="12" r="1.2" fill="currentColor"/>
+          <circle cx="8" cy="16" r="1.2" fill="currentColor"/>
+          <circle cx="16" cy="16" r="1.2" fill="currentColor"/>
+        </svg>
+      </button>
     </div>
+
     <div class="header-actions">
-      <div class="controls-top">
-        <select id="tag-select" class="filter-select" aria-label="Filter records by tag">
-          <option value="all">All</option>
-        </select>
-        <select id="sort-select" class="filter-select" aria-label="Sort records">
-          <option value="title">Sort by Title</option>
-          <option value="artist">Sort by Artist</option>
-          <option value="year">Sort by Year</option>
-        </select>
-        <label class="toggle-label">
-          <input id="hide-christmas" type="checkbox" checked>
-            Hide Christmas
-          </label>
+      <div class="pill-row">
+        <select id="tag-select" class="filter-select" aria-label="Filter records by tag"></select>
+      </div>
+
+      <div class="pill-row" role="group" aria-label="Sort records">
+        <span class="pill-label">Sort</span>
+        <button class="pill" data-sort="title" aria-pressed="true">Title</button>
+        <button class="pill" data-sort="artist" aria-pressed="false">Artist</button>
+        <button class="pill" data-sort="year" aria-pressed="false">Year</button>
+        <button class="pill" id="christmas-toggle" aria-pressed="true">Hide Christmas</button>
       </div>
 
       <div class="controls-bottom">
-        <input id="search-input" class="search-input" type="search" placeholder="Search by title, artist, tag or year"
-          aria-label="Search records">
-        <button id="random-btn" class="filter-btn">🎲 Random entry</button>
+        <input id="search-input" class="search-input" type="search"
+          placeholder="Search by title, artist, tag or year" aria-label="Search records">
       </div>
     </div>
   </header>
 
   <main>
+    <div class="result-count" id="result-count"></div>
     <div class="cards" id="cards">
       <div class="loading">
         <div class="spinner"></div>
@@ -52,185 +61,210 @@
   </main>
 
   <script>
-    let allRecords = [];
-    let currentFilter = 'all';
-    let currentSort = 'title';
-    let currentHideChristmas = false;
+    // ── State ───────────────────────────────────────────────────────────────────
+    const state = {
+      records: [],
+      tag: 'all',                // 'all' or a single tag
+      sort: 'title',
+      hideChristmas: true,       // matches the button's initial pressed state
+      search: '',
+    };
 
-    // ── Fetch data ──────────────────────────────────────────────────────────────
+    // ── Load ────────────────────────────────────────────────────────────────────
     fetch('records.json?_=' + Date.now())
       .then(r => r.json())
       .then(data => {
-        allRecords = Array.isArray(data) ? data : [];
-        initTagSelect();
-        initSortSelect();
-        initHideChristmas();
-        initSearchInput();
-        initRandomButton();
+        const raw = Array.isArray(data) ? data : [];
+        normaliseTags(raw);
+        state.records = raw;
+        initControls();
         render();
       })
       .catch(err => {
         document.getElementById('cards').innerHTML =
-          `<div class="empty">⚠️ Could not load record data.<br><small>${escHtml(err.message)}</small></div>`;
+          `<div class="empty">⚠️ Could not load record data.<br><small>${esc(err.message)}</small></div>`;
       });
+
+    // Merge case variants ("main" / "Main") into the most common spelling
+    function normaliseTags(records) {
+      const counts = new Map();   // lowercase -> Map(raw -> count)
+      records.forEach(r => {
+        (r.tags || []).forEach(raw => {
+          const t = String(raw || '').trim();
+          if (!t) return;
+          const key = t.toLowerCase();
+          if (!counts.has(key)) counts.set(key, new Map());
+          const m = counts.get(key);
+          m.set(t, (m.get(t) || 0) + 1);
+        });
+      });
+      const canonical = new Map();
+      counts.forEach((variants, key) => {
+        const best = [...variants.entries()].sort((a, b) => b[1] - a[1])[0][0];
+        canonical.set(key, best);
+      });
+      records.forEach(r => {
+        r.tags = [...new Set((r.tags || [])
+          .map(t => canonical.get(String(t || '').trim().toLowerCase()))
+          .filter(Boolean))];
+      });
+    }
+
+    // ── Controls ────────────────────────────────────────────────────────────────
+    function initControls() {
+      state.hideChristmas = document.getElementById('christmas-toggle')
+        .getAttribute('aria-pressed') === 'true';
+
+      document.querySelectorAll('[data-sort]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.sort = btn.dataset.sort;
+          document.querySelectorAll('[data-sort]').forEach(b =>
+            b.setAttribute('aria-pressed', String(b === btn)));
+          render();
+        });
+      });
+
+      document.getElementById('christmas-toggle').addEventListener('click', e => {
+        state.hideChristmas = !state.hideChristmas;
+        e.currentTarget.setAttribute('aria-pressed', String(state.hideChristmas));
+        render();
+      });
+
+      document.getElementById('search-input').addEventListener('input', e => {
+        state.search = e.target.value.trim().toLowerCase();
+        render();
+      });
+
+      document.getElementById('random-btn').addEventListener('click', () => {
+        const list = sortRecords(visibleRecords());
+        if (!list.length) return;
+        render(Math.floor(Math.random() * list.length));
+      });
+
+      document.getElementById('tag-select').addEventListener('change', e => {
+        state.tag = e.target.value;
+        render();
+      });
+    }
+
+    // ── Filtering & sorting ─────────────────────────────────────────────────────
+    function isChristmas(record) {
+      return searchText(record).includes('christmas');
+    }
+
+    function searchText(record) {
+      return [record.title, record.artist, ...(record.tags || []), record.year]
+        .filter(Boolean).join(' ').toLowerCase();
+    }
+
+    // Records passing the Christmas and search filters (used for pill counts too)
+    function baseRecords() {
+      return state.records.filter(r => {
+        if (state.hideChristmas && isChristmas(r)) return false;
+        if (state.search && !searchText(r).includes(state.search)) return false;
+        return true;
+      });
+    }
+
+    // Records that also match the selected tag
+    function visibleRecords() {
+      return baseRecords().filter(r =>
+        state.tag === 'all' || (r.tags || []).includes(state.tag));
+    }
+
+    function yearNum(r) {
+      const n = Number(r.year);
+      return r.year && Number.isFinite(n) ? n : null;
+    }
+
+    function cmp(a, b) {
+      return String(a || '').localeCompare(String(b || ''), undefined,
+        { sensitivity: 'base', numeric: true });
+    }
+
+    function sortRecords(list) {
+      return [...list].sort((a, b) => {
+        if (state.sort === 'year') {
+          const ya = yearNum(a), yb = yearNum(b);
+          if (ya === null && yb !== null) return 1;   // undated (playlists) last
+          if (yb === null && ya !== null) return -1;
+          if (ya !== null && ya !== yb) return ya - yb;
+        } else if (state.sort === 'artist') {
+          const c = cmp(a.artist, b.artist);
+          if (c) return c;
+        }
+        return cmp(a.title, b.title);
+      });
+    }
 
     // ── Render ──────────────────────────────────────────────────────────────────
     function render(highlightIndex) {
-      const filtered = getFilteredRecords();
+      renderTagSelect();
 
-      const sorted = [...filtered].sort((a, b) => {
-        if (currentSort === 'year') {
-          return (Number(a.year) || 0) - (Number(b.year) || 0);
-        }
-        const left = String(a[currentSort] || '').toLowerCase();
-        const right = String(b[currentSort] || '').toLowerCase();
-        return left.localeCompare(right);
-      });
-
+      const list = sortRecords(visibleRecords());
       const container = document.getElementById('cards');
-      const randomBtn = document.getElementById('random-btn');
+      document.getElementById('random-btn').disabled = list.length === 0;
+      document.getElementById('result-count').textContent =
+        `${list.length} record${list.length === 1 ? '' : 's'}`;
 
-      if (randomBtn) {
-        randomBtn.disabled = sorted.length === 0;
-      }
-
-      if (sorted.length === 0) {
-        container.innerHTML = '<div class="empty">No records match this filter.</div>';
+      if (!list.length) {
+        container.innerHTML = '<div class="empty">No records match these filters.</div>';
         return;
       }
 
-      container.innerHTML = sorted.map((record, index) => cardHTML(record, index)).join('');
+      container.innerHTML = list.map(cardHTML).join('');
+
       if (typeof highlightIndex === 'number') {
         highlightCardByIndex(highlightIndex);
       }
     }
 
-    function getFilteredRecords() {
-      return allRecords.filter(record => {
-        const matchesTag = currentFilter === 'all' || (record.tags || []).includes(currentFilter);
-        if (!matchesTag) return false;
-        if (currentHideChristmas && isChristmasRecord(record)) return false;
-        if (!currentSearch) return true;
+    function renderTagSelect() {
+      const select = document.getElementById('tag-select');
+      const base = baseRecords();
+      const counts = new Map();
+      base.forEach(r => (r.tags || []).forEach(t => counts.set(t, (counts.get(t) || 0) + 1)));
 
-        const hay = [record.title, record.artist, ...(record.tags || []), record.year]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        return hay.indexOf(currentSearch) !== -1;
-      });
+      // List every tag in the collection so the current choice never disappears
+      const allTags = new Set();
+      state.records.forEach(r => (r.tags || []).forEach(t => allTags.add(t)));
+      const tags = [...allTags].sort((a, b) => cmp(a, b));
+
+      select.innerHTML = [
+        `<option value="all">All tags (${base.length})</option>`,
+        ...tags.map(t =>
+          `<option value="${esc(t)}">${esc(t)} (${counts.get(t) || 0})</option>`)
+      ].join('');
+      select.value = state.tag;
     }
 
     function cardHTML(record, index) {
-      const tags = Array.isArray(record.tags) ? record.tags : [];
+      const year = record.year ? esc(String(record.year)) : '';
 
-      return `
-      <div class="card" data-card-index="${index}">
-        <div class="card-header">
-          ${record.thumbnail ? `<img class="card-thumb" src="${escAttr(record.thumbnail)}" alt="${escAttr(record.title || '')}">` : ''}
-          <div style="flex:1">
-            <div class="card-title">${escHtml(record.title)}</div>
-            ${record.artist ? `<div class="card-game">${escHtml(record.artist)}</div>` : ''}
-          </div>
+      const inner = `
+        <div class="card-cover">
+          ${record.thumbnail
+            ? `<img src="${esc(record.thumbnail)}" alt="" decoding="async">`
+            : `<div class="no-art">♪</div>`}
+          ${record.url ? `<span class="card-open">↗ Spotify</span>` : ''}
         </div>
+        <div class="card-body">
+          <div class="card-title">${esc(record.title)}</div>
+          ${record.artist ? `<div class="card-artist">${esc(record.artist)}</div>` : ''}
+          ${year ? `<div class="card-year">${year}</div>` : ''}
+        </div>`;
 
-        <div class="card-meta">
-          ${record.year ? `<span>🗓️ ${escHtml(String(record.year))}</span>` : ''}
-          ${tags.length ? `<span>🏷️ ${escHtml(tags.join(', '))}</span>` : ''}
-        </div>
+      const label = [record.title, record.artist].filter(Boolean).join(' – ');
 
-        <a class="card-link" href="${escAttr(record.url || '#')}" target="_blank" rel="noopener">
-          ↗ Open on Spotify
-        </a>
-      </div>`;
-    }
-
-    // ── Filter buttons ──────────────────────────────────────────────────────────
-    function initTagSelect() {
-      const select = document.getElementById('tag-select');
-      if (!select) return;
-
-      const tags = Array.from(new Set(
-        allRecords
-          .flatMap(record => Array.isArray(record.tags) ? record.tags : [])
-          .map(tag => (tag || '').trim())
-          .filter(Boolean)
-      )).sort((a, b) => a.localeCompare(b));
-
-      select.innerHTML = [
-        `<option value="all">All</option>`,
-        ...tags.map(tag => `<option value="${escAttr(tag)}">${escHtml(tag)}</option>`)
-      ].join('');
-
-      select.value = currentFilter;
-      select.addEventListener('change', () => {
-        currentFilter = select.value;
-        render();
-      });
-    }
-
-    function initSortSelect() {
-      const select = document.getElementById('sort-select');
-      if (!select) return;
-
-      select.value = currentSort;
-      select.addEventListener('change', () => {
-        currentSort = select.value;
-        render();
-      });
-    }
-
-    function initRandomButton() {
-      const button = document.getElementById('random-btn');
-      if (!button) return;
-
-      button.addEventListener('click', () => {
-        const filtered = getFilteredRecords();
-        const sorted = [...filtered].sort((a, b) => {
-          if (currentSort === 'year') {
-            return (Number(a.year) || 0) - (Number(b.year) || 0);
-          }
-          const left = String(a[currentSort] || '').toLowerCase();
-          const right = String(b[currentSort] || '').toLowerCase();
-          return left.localeCompare(right);
-        });
-
-        if (!sorted.length) return;
-        const randomIndex = Math.floor(Math.random() * sorted.length);
-        render(randomIndex);
-      });
-    }
-
-    // ── Search ─────────────────────────────────────────────────────────────────
-    let currentSearch = '';
-    function initHideChristmas() {
-      const checkbox = document.getElementById('hide-christmas');
-      if (!checkbox) return;
-      checkbox.addEventListener('change', () => {
-        currentHideChristmas = checkbox.checked;
-        render();
-      });
-    }
-
-    function initSearchInput() {
-      const input = document.getElementById('search-input');
-      if (!input) return;
-      input.addEventListener('input', () => {
-        currentSearch = (input.value || '').trim().toLowerCase();
-        render();
-      });
-    }
-
-    function isChristmasRecord(record) {
-      const text = [record.title, record.artist, ...(record.tags || []), record.year]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return text.includes('christmas');
+      return record.url
+        ? `<a class="card" data-card-index="${index}" href="${esc(record.url)}"
+              target="_blank" rel="noopener" aria-label="${esc(label)}">${inner}</a>`
+        : `<div class="card" data-card-index="${index}">${inner}</div>`;
     }
 
     // ── Utils ───────────────────────────────────────────────────────────────────
     function highlightCardByIndex(index) {
-      document.querySelectorAll('.card.highlighted').forEach(card => card.classList.remove('highlighted'));
+      document.querySelectorAll('.card.highlighted').forEach(c => c.classList.remove('highlighted'));
       const card = document.querySelector(`.card[data-card-index="${index}"]`);
       if (card) {
         card.classList.add('highlighted');
@@ -238,21 +272,18 @@
       }
     }
 
-    function escHtml(str) {
-      if (!str) return '';
-      return str
+    function esc(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    function escAttr(str) {
-      // For attribute values (we still escape HTML entities for safety)
-      return escHtml(str).replace(/'/g, '&#39;');
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
   </script>
-  <footer style="text-align: center;">
+
+  <footer>
     <p>Open-source personal web project built by me, Chris Jones (stopherjones). For more information, see <a href="https://stopherjones.github.io/about.html">About Me</a></p>
   </footer>
 </body>
